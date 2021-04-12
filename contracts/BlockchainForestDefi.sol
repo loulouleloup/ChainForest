@@ -6,7 +6,8 @@ pragma solidity 0.6.11;
  * @dev Wrappers over Solidity's arithmetic operations with added overflow
  * checks.
  *
- * Arithmetic operations in Solidity wrap on overflow. This can easily result
+ * Arithmetic operations in Solidity wrap on overflow. Th
+ * is can easily result
  * in bugs, because programmers usually assume that an overflow raises an
  * error, which is the standard behavior in high level programming languages.
  * `SafeMath` restores this intuition by reverting the transaction when an
@@ -437,11 +438,11 @@ interface IERC20 {
 contract BlockchainForestDefi is Ownable {
     
     
-    address daiTokenAddress = '0xC4375B7De8af5a38a93548eb8453a498222C4fF2';
-    address usdtTokenAddress = '0xf3e0d7bF58c5d455D31ef1c2d5375904dF525105';
+    address daiTokenAddress = 0xC4375B7De8af5a38a93548eb8453a498222C4fF2;
+    address usdtTokenAddress = 0xf3e0d7bF58c5d455D31ef1c2d5375904dF525105;
     
-    address uniswapRouterAddress = '0x05fF2B0DB69458A0750badebc4f9e13aDd608C7F';
-    address uniswapFactoryAddress = '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f';
+    address uniswapRouterAddress = 0x05fF2B0DB69458A0750badebc4f9e13aDd608C7F;
+    address uniswapFactoryAddress = 0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f;
     
     IUniswapV2Router02 uniswapRouter = IUniswapV2Router02(0x05fF2B0DB69458A0750badebc4f9e13aDd608C7F);
     IUniswapV2Factory uniswapFactory = IUniswapV2Factory(0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f);
@@ -458,27 +459,27 @@ contract BlockchainForestDefi is Ownable {
    
 
    function swapHalfDaiToUsdc(uint _amount) public onlyOwner {
-      IUniswapV2Router02 UniswapRouter = (0x05fF2B0DB69458A0750badebc4f9e13aDd608C7F);
+      IUniswapV2Router02 UniswapRouter = IUniswapV2Router02(0x05fF2B0DB69458A0750badebc4f9e13aDd608C7F);
       address[] memory path = new address[](2);
       path[0] = daiTokenAddress; 
       path[1] = usdtTokenAddress;
       IERC20 daiInstance = IERC20(daiTokenAddress);
       daiInstance.approve(address(UniswapRouter), _amount);
-      UniswapRouter.swapExactTokensForETHSupportingFeeOnTransferTokens(_amount, 10, path, address(this), now + 120 );
+      uniswapRouter.swapExactTokensForETHSupportingFeeOnTransferTokens(_amount, 10, path, address(this), now + 120 );
       path[0] = daiTokenAddress; 
       path[1] = usdtTokenAddress;
       uint amountout = address(this).balance;
-      UniswapRouter.swapExactETHForTokens{value: amountout}(10, path, address(this), now + 120 );
+      uniswapRouter.swapExactETHForTokens{value: amountout}(10, path, address(this), now + 120 );
      
    }
         
-    function addliquidityToDaiUsdc(uint _amountDai) public returns (address) {
-        IUniswapV2Router02 UniswapRouter = (0x05fF2B0DB69458A0750badebc4f9e13aDd608C7F);
+    function addliquidityToDaiUsdc(uint _amountDai) public returns (bool) {
+        IUniswapV2Router02 UniswapRouter = IUniswapV2Router02(0x05fF2B0DB69458A0750badebc4f9e13aDd608C7F);
         IERC20 daiInstance = IERC20(daiTokenAddress);
         IERC20 usdtInstance = IERC20(usdtTokenAddress); 
-        daiInstance.approve(UniswapRouter, _amountDai);
-        usdtInstance.approve(UniswapRouter, _amountDai);
-        UniswapRouter.addLiquidity(address(this), daiInstance, _amountDai, _amountDai, 1000, 1000, owner, now + 120);
+        daiInstance.approve(address(UniswapRouter), _amountDai);
+        usdtInstance.approve(address(UniswapRouter), _amountDai);
+        uniswapRouter.addLiquidity(address(this), daiTokenAddress, _amountDai, _amountDai, 1000, 1000, owner, now + 120);
         return true;
         
     }
