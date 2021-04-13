@@ -21,7 +21,7 @@ module.exports = {
     },
     kovan: {
       provider: function() {
-        return new HDWalletProvider(`${process.env.MNEMONIC}`, `wss://kovan.infura.io/ws/v3/6929f9974dea434a8ff0daec67a6553c`)
+        return new HDWalletProvider(`${process.env.MNEMONIC}`, "https://kovan.infura.io/v3/6929f9974dea434a8ff0daec67a6553c")
       },
       network_id: 42,
       //from: "0xf1e1c8753bB650ab29E1a0f8CFC5a0601d364130" 
@@ -29,7 +29,7 @@ module.exports = {
   },
   compilers: {
     solc: {
-       version: "0.6.11",    // Fetch exact version from solc-bin (default: truffle's version)
+       version: "0.7.0",    // Fetch exact version from solc-bin (default: truffle's version)
       // docker: true,        // Use "0.5.1" you've installed locally with docker (default: false)
       // settings: {          // See the solidity docs for advice about optimization and evmVersion
       //  optimizer: {
