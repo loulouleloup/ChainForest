@@ -34,19 +34,19 @@ import './Projects.sol';
     uint  public maxPurchase;
     ERC20Token public CFtoken; // 0x85e591Ef83265680ce6F5D2916d115c458fbE2C4
     
-    IERC20 public dai;
+    
 
-    //IERC20 dai = IERC20(0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa);
+    IERC20 dai = IERC20(0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa);
     address public defiContract = 0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa; //A mettre dans le constructor ==> deploy
 
-    constructor(address tokenAddress, uint _duration, uint _price, uint _availableTokens, uint _minPurchase, uint _maxPurchase, IERC20 _daiInstance) public {
+    constructor(address tokenAddress, uint _duration, uint _price, uint _availableTokens, uint _minPurchase, uint _maxPurchase) public {
        CFtoken = ERC20Token(tokenAddress);
         require(_duration > 0,'_duration shloud be > 0');
         require(_availableTokens > 0 && _availableTokens <= CFtoken.maxTotalSupply(),'_availableTokens should be > 0 and <= maxTotalSupply');
         require(_minPurchase > 0,'_minPurchase shloud be > 0');
         require(_maxPurchase > 0 && _maxPurchase <= _availableTokens,'_maxPurchase should be > 0 and <= availableTokens');
         
-        dai = _daiInstance;
+       
 
         admin = msg.sender;
         duration = _duration;
