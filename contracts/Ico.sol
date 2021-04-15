@@ -15,6 +15,15 @@ import './Projects.sol';
  contract Ico {
     using SafeMath for uint;
 
+    enum WorkflowStatus {
+        notStartedYet, // 0
+        started, // 1
+        ended // 2
+   
+    }
+       // status du contrat
+    WorkflowStatus public workflowStatus;
+
     struct Sale{
         address invertor;
         uint daiLoan;
@@ -81,6 +90,8 @@ import './Projects.sol';
     }
     function start() external onlyAdmin() icoNotActive(){
         end = block.timestamp + duration;
+        workflowStatus = WorkflowStatus.started;
+
     }
     
     function approve(uint daiAmount) public icoActive(){
@@ -88,6 +99,9 @@ import './Projects.sol';
         daiInstance.approve(address(this), daiAmount);
 
     }
+    function getWorkflowStatus() external view returns (WorkflowStatus) {
+         return workflowStatus;       
+     }
 
     function buy(uint daiLoan, uint durationLoan, uint idProjet) external icoActive(){
         IERC20 daiInstance = IERC20(daiTokenAddress);
@@ -117,3 +131,8 @@ import './Projects.sol';
     }
    
 }
+
+
+
+
+

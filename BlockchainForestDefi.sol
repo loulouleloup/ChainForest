@@ -1,4 +1,4 @@
-pragma solidity 0.6.11;
+pragma solidity 0.7.0;
 
 // SPDX-License-Identifier: BSD-3-Clause
 
