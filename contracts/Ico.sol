@@ -34,9 +34,10 @@ import './Projects.sol';
     uint  public maxPurchase;
     ERC20Token public CFtoken; // 0x85e591Ef83265680ce6F5D2916d115c458fbE2C4
     
-    
+     address daiTokenAddress = 0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa;
 
-    IERC20 dai = IERC20(0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa);
+
+    //IERC20 dai = IERC20(0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa);
     address public defiContract = 0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa; //A mettre dans le constructor ==> deploy
 
     constructor(address tokenAddress, uint _duration, uint _price, uint _availableTokens, uint _minPurchase, uint _maxPurchase) public {
@@ -82,20 +83,23 @@ import './Projects.sol';
         end = block.timestamp + duration;
     }
     
-    function approve(uint daiAmount) external icoActive(){
-        dai.approve(address(this), daiAmount);
-    
+    function approve(uint daiAmount) public icoActive(){
+         IERC20 daiInstance = IERC20(daiTokenAddress);
+        daiInstance.approve(address(this), daiAmount);
+
     }
 
     function buy(uint daiLoan, uint durationLoan, uint idProjet) external icoActive(){
+        IERC20 daiInstance = IERC20(daiTokenAddress);
+
         require(daiLoan >= minPurchase && daiLoan <= maxPurchase,' daiAmount should be between min and max purchase');
         uint tokenAmount = daiLoan.div(price);
         require(tokenAmount <= availableTokens,'not enought token');
-        dai.transferFrom(msg.sender, address(this), daiLoan); //address(this) à remplacer par defiContract address
+        daiInstance.transferFrom(msg.sender, address(this), daiLoan); //address(this) à remplacer par defiContract address
         sales[msg.sender] = Sale(msg.sender,daiLoan,tokenAmount,false,idProjet,durationLoan);
     }
 
-    function withdrawTokens() external loanActive(){
+    function withdrawTokens() external {
         Sale storage sale = sales[msg.sender];  
         require(sale.daiLoan > 0,'only invertors');
         require(sale.tokensWithdrawn == false,'tokens were already withdraw');
@@ -104,9 +108,11 @@ import './Projects.sol';
     }
 
     function withdrawDai() external loanEnded(){
+        IERC20 daiInstance = IERC20(daiTokenAddress);
+
         Sale storage sale = sales[msg.sender];  
         require(sale.daiLoan > 0,'only invertors');
-        dai.transfer(admin, sale.daiLoan ); //admin à remplacer par defiContract address
+        daiInstance.transfer(admin, sale.daiLoan ); //admin à remplacer par defiContract address
 
     }
    

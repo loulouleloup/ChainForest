@@ -14,7 +14,7 @@ import ListGroup from 'react-bootstrap/ListGroup';
 import Table from 'react-bootstrap/Table';
 
 
-import VotingContract from "./contracts/Voting.json";
+import IcoContract from "./contracts/Ico.json";
 import getWeb3 from "./getWeb3";
 
 import "./App.css";
@@ -38,15 +38,15 @@ class App extends Component {
 
       // Get the contract instance.
       const networkId = await web3.eth.net.getId();
-      const deployedNetwork = VotingContract.networks[networkId];
+      const deployedNetwork = IcoContract.networks[networkId];
       const contract = new web3.eth.Contract(
-        VotingContract.abi,
+        IcoContract.abi,
         deployedNetwork && deployedNetwork.address,
       );
 
 
       const contractWorkflowStatus = await contract.methods.getWorkflowStatus().call();
-      //contractWorkflowStatus = parseInt(contractWorkflowStatus);
+      contractWorkflowStatus = parseInt(contractWorkflowStatus);
       let tmp_wf = contractWorkflowStatus;
       let workflowStatusDescription = "";
       let nextWorkflow = "";
@@ -65,33 +65,22 @@ class App extends Component {
           workflowStatusDescription = "Proposals Registration Ended";
           nextWorkflow = "Voting Session Started";
           break;
-        case '3':
-          workflowStatusDescription = "Voting Session Started";
-          nextWorkflow = "Voting Session Ended";
-          break;
-        case '4':
-          workflowStatusDescription = "Voting Session Ended";
-          nextWorkflow = "Votes Tallied";
-          break;
-        case '5':
-          workflowStatusDescription = "Votes Tallied";
-          break;
         default:
           workflowStatusDescription = "Unknown Status";
       }
 
-      let whitelistArray = await contract.methods.getWhitelist().call();
-      if (contractWorkflowStatus >= 1) {
-        let proposalArray = await contract.methods.getProposal().call();
+      //let whitelistArray = await contract.methods.getWhitelist().call();
+      //if (contractWorkflowStatus >= 1) {
+        let proposalArray = await contract.methods.getProject().call();
         this.setState({ proposalArray });
         console.log(proposalArray);
-      }
+      //}
 
-      if (contractWorkflowStatus == 5) {
+      /*if (contractWorkflowStatus == 5) {
         const winningProposalId = await contract.methods.winningProposalId().call();
         this.setState({ winningProposalId });
         console.log('winningProposalId', winningProposalId);
-      }
+      }*/
 
 
       let accountBalance = await web3.eth.getBalance(accounts[0]);
@@ -104,7 +93,8 @@ class App extends Component {
 
       // Set web3, accounts, and contract to the state, and then proceed with an
       // example of interacting with the contract's methods.
-      this.setState({ web3, accounts, contract, whitelistArray, accountBalance, workflowStatusDescription, contractWorkflowStatus, nextWorkflow });
+     // this.setState({ web3, accounts, contract, whitelistArray, accountBalance, workflowStatusDescription, contractWorkflowStatus, nextWorkflow });
+     this.setState({ web3, accounts, contract, accountBalance });
     } catch (error) {
       // Catch any errors for any of the above operations.
       alert(
@@ -114,6 +104,7 @@ class App extends Component {
     }
   };
 
+  /*
   nextWorkflow = async () => {
     const { accounts, contract, web3 } = this.state;
     const context = this;
@@ -183,18 +174,19 @@ class App extends Component {
       }
     });
   };
+  */
 
   proposal = async () => {
     const { accounts, contract, web3 } = this.state;
     const proposalDescription = this.proposalDescription.value;
     let context = this;
-    await contract.methods.registerProposal(proposalDescription).send({ from: accounts[0], gasPrice: 100000 }, async function (erreur, tx) {
+    await contract.methods.registerProjet(proposalDescription).send({ from: accounts[0], gasPrice: 100000 }, async function (erreur, tx) {
       if (tx) {
-        console.log("[registerProposal] tx : ", tx);
+        console.log("[registerProjet] tx : ", tx);
         await web3.eth.getTransactionReceipt(tx, async function (erreur, receipt) {
-          console.log("[registerProposal] receipt.logs :", receipt.logs);
+          console.log("[registerProjet] receipt.logs :", receipt.logs);
           if (receipt.status) {
-            let response = await contract.methods.getProposal().call();
+            let response = await contract.methods.getProject().call();
             context.setState({ proposalArray: response });
             context.proposalDescription.value = "";
           }
@@ -203,6 +195,7 @@ class App extends Component {
     });
   };
 
+  /*
   vote = async () => {
     const { accounts, contract, web3 } = this.state;
     const voteId = this.voteId.value;
@@ -214,7 +207,7 @@ class App extends Component {
         await web3.eth.getTransactionReceipt(tx, async function (erreur, receipt) {
           console.log("[vote] receipt.logs :", receipt.logs);
           if (receipt.status) {
-            let response = await contract.methods.getProposal().call();
+            let response = await contract.methods.getProject().call();
             context.setState({ proposalArray: response });
             context.voteId.value = 0;
           }
@@ -222,26 +215,21 @@ class App extends Component {
       }
     });
   };
-
+*/
   renderWorkflowButtons() {
     let buttonLabel = "Status du contrat inconnu !";
     let status = parseInt(this.state.contractWorkflowStatus);
     switch (status) {
       case 0:
-        buttonLabel = "Démarrer la session d'enregistrement des propositions";
+        buttonLabel = "started";
         break;
       case 1:
-        buttonLabel = "Terminer la session d'enregistrement des propositions";
+        buttonLabel = "ended";
         break;
       case 2:
-        buttonLabel = "Démarrer la session de votes";
+        buttonLabel = "thanks";
         break;
-      case 3:
-        buttonLabel = "Terminer la session de votes";
-        break;
-      case 4:
-        buttonLabel = "Compter les votes";
-        break;
+   
     }
     if (status < 5) {
       return (
@@ -264,29 +252,20 @@ class App extends Component {
     let label = "Status du contrat inconnu !";
     switch (parseInt(this.state.contractWorkflowStatus)) {
       case 0:
-        label = "RegisteringVoters";
+        label = "notstartedyet";
         break;
       case 1:
-        label = "ProposalsRegistrationStarted";
+        label = "started";
         break;
       case 2:
-        label = "ProposalsRegistrationEnded";
-        break;
-      case 3:
-        label = "VotingSessionStarted";
-        break;
-      case 4:
-        label = "VotingSessionEnded";
-        break;
-      case 5:
-        label = "VotesTallied";
+        label = "ended";
         break;
     }
     return (
       <h5 color="primary">Workflow Status = { label} ({ this.state.contractWorkflowStatus}) </h5>
     );
   }
-
+/*
   renderVoterRegistration() {
     if (parseInt(this.state.contractWorkflowStatus) === 0) {
       if (this.state.isOwner) {
@@ -345,7 +324,7 @@ class App extends Component {
       );
     }
   }
-
+  */
   renderProposalsRegistration() {
     let status = parseInt(this.state.contractWorkflowStatus);
     return (
@@ -390,6 +369,7 @@ class App extends Component {
     );
   }
 
+  /*
   renderVotingSession() {
     let status = parseInt(this.state.contractWorkflowStatus);
     return (
@@ -429,7 +409,7 @@ class App extends Component {
       );
     }
   }
-
+*/
   render() {
     if (!this.state.web3) {
       return <div>Loading Web3, accounts, and contract...</div>;
@@ -460,10 +440,7 @@ class App extends Component {
                 : <span />
               }
             </Grid>
-            {this.renderVoterRegistration()}
-            {this.renderProposalsRegistration()}
-            {this.renderVotingSession()}
-            {this.renderVotesTallied()}
+            {this.renderProposalsRegistration()}            
           </Grid>
         </Container>
       </div>
