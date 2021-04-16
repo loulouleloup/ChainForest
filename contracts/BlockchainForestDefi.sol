@@ -568,24 +568,19 @@ contract BlockchainForestDefi is Ownable {
     }
     
     
-    //fonction swap usdt vers dai  
-//     function swapHalfUsdtToDai(uint _amount) public onlyOwner {
-//           //Local variables
-//           IUniswapV2Router02 UniswapRouter = IUniswapV2Router02(0x05fF2B0DB69458A0750badebc4f9e13aDd608C7F);
-//           address[] memory path = new address[](2);
-//           path[0] = usdtTokenAddress; 
-//           path[1] = daiTokenAddress;
-          
-//           //Actions
-//           IERC20 usdtInstance = IERC20(usdtTokenAddress);
-//           usdtInstance.approve(address(UniswapRouter), _amount);
-//           uniswapRouter.swapExactTokensForETHSupportingFeeOnTransferTokens(_amount, 10, path, address(this), now + 120 );
-//           path[0] = usdtTokenAddress; 
-//           path[1] = daiTokenAddress;
-//           uint amountout = address(this).balance;
-//           uniswapRouter.swapExactETHForTokens{value: amountout}(10, path, address(this), now + 120 );
-     
-//   }     
+    function swapHalfUsdcToDai(uint _amount) public onlyOwner {
+      uint amountTemp = _amount.mul(1e18);
+      //amountTemp = amountTemp.div(2);
+      
+      IUniswapV2Router02 UniswapRouter = IUniswapV2Router02(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
+      address[] memory path = new address[](2);
+      path[0] = usdtTokenAddress; 
+      path[1] = daiTokenAddress;
+      IERC20 usdtInstance = IERC20(usdtTokenAddress);
+      usdtInstance.safeApprove(address(UniswapRouter), amountTemp);
+      UniswapRouter.swapExactTokensForTokens(amountTemp, 1, path, address(this), now + 120 );
+      
+   }
     //fonction envoi Dai au contrat de Louis (argument nb dai investis par l'utilisateur)
     
     //fonction qui appelle les 3 fonctions pour que Louis appelle seulement celle-ci
