@@ -15,6 +15,8 @@ import Table from 'react-bootstrap/Table';
 
 
 import IcoContract from "./contracts/Ico.json";
+import ProjectsContract from "./contracts/Projects.json";
+
 import getWeb3 from "./getWeb3";
 
 import "./App.css";
@@ -43,10 +45,16 @@ class App extends Component {
         IcoContract.abi,
         deployedNetwork && deployedNetwork.address,
       );
+      /*const deployedNetwork2 = ProjectsContract.networks[networkId];
+      const contract2 = new web3.eth.Contract(
+        ProjectsContract.abi,
+        deployedNetwork2 && deployedNetwork2.address,
+      );
 
-
+        */
+        /*
       const contractWorkflowStatus = await contract.methods.getWorkflowStatus().call();
-      contractWorkflowStatus = parseInt(contractWorkflowStatus);
+      //contractWorkflowStatus = parseInt(contractWorkflowStatus);
       let tmp_wf = contractWorkflowStatus;
       let workflowStatusDescription = "";
       let nextWorkflow = "";
@@ -67,13 +75,13 @@ class App extends Component {
           break;
         default:
           workflowStatusDescription = "Unknown Status";
-      }
+      }*/
 
       //let whitelistArray = await contract.methods.getWhitelist().call();
       //if (contractWorkflowStatus >= 1) {
-        let proposalArray = await contract.methods.getProject().call();
+     /*   let proposalArray = await contract2.methods.getProject().call();
         this.setState({ proposalArray });
-        console.log(proposalArray);
+        console.log(proposalArray); */
       //}
 
       /*if (contractWorkflowStatus == 5) {
@@ -104,8 +112,8 @@ class App extends Component {
     }
   };
 
-  /*
-  nextWorkflow = async () => {
+  
+ /* nextWorkflow = async () => {
     const { accounts, contract, web3 } = this.state;
     const context = this;
     switch (parseInt(this.state.contractWorkflowStatus)) {
@@ -118,22 +126,9 @@ class App extends Component {
       case 2:
         await contract.methods.startVotingSession().send({ from: accounts[0], gasPrice: 100000 }, this.getWorkflowStatus);
         break;
+     
+     
       case 3:
-        await contract.methods.endVotingSession().send({ from: accounts[0], gasPrice: 100000 }, this.getWorkflowStatus);
-        break;
-      case 4:
-        await contract.methods.tally().send({ from: accounts[0], gasPrice: 100000 }, async (erreur, tx) => {
-          if (tx) {
-            await web3.eth.getTransactionReceipt(tx, async function (erreur, receipt) {
-              if (receipt.status) {
-                const winningProposalId = await contract.methods.getWinningProposalId().call();
-                context.setState({ winningProposalId });
-              }
-            });
-          }
-        });
-        break;
-      case 5:
         console.log('Contrat arrivé à échéance')
     }
     contract.getPastEvents('WorkflowStatusChange', { filter: { _from: accounts[0] }, fromBlock: 0, toBlock: 'latest' }, function (error, events) { if (!error) console.log(events) });
@@ -152,7 +147,8 @@ class App extends Component {
       });
     }
   }
-
+  */
+/*
   whitelist = async () => {
     const { accounts, contract, web3 } = this.state;
     const addressWhitelist = this.addressWhitelist.value;
@@ -195,6 +191,35 @@ class App extends Component {
     });
   };
 
+  deposite = async () => {
+    const { accounts, contract, web3 } = this.state;
+    let context = this;
+    const daiAmount = this.daiAmount.value;
+    const idProjet = this.idProjet.value;
+    const time = this.time.value;
+    console.log('daiAmount : ',daiAmount);
+    console.log('idProjet : ',idProjet);
+    console.log('time : ',time);
+
+
+
+    await contract.methods.approve(daiAmount,idProjet,time).send({ from: accounts[0], gasPrice: 100000 }, async function (erreur, tx) {
+      if (tx) {
+        console.log("[approve] tx : ", tx);
+        await web3.eth.getTransactionReceipt(tx, async function (erreur, receipt) {
+          console.log("[approve] receipt.logs :", receipt.logs);
+          if (receipt.status) {
+            //let response = await contract.methods.getProject().call();
+            // context.setState({ proposalArray: response });
+            //context.proposalDescription.value = "";
+          }else if (erreur){
+            console.log('erreur : ', erreur);
+          }
+        })
+      }
+    });
+  };
+
   /*
   vote = async () => {
     const { accounts, contract, web3 } = this.state;
@@ -216,6 +241,7 @@ class App extends Component {
     });
   };
 */
+/*
   renderWorkflowButtons() {
     let buttonLabel = "Status du contrat inconnu !";
     let status = parseInt(this.state.contractWorkflowStatus);
@@ -265,6 +291,8 @@ class App extends Component {
       <h5 color="primary">Workflow Status = { label} ({ this.state.contractWorkflowStatus}) </h5>
     );
   }
+
+  */
 /*
   renderVoterRegistration() {
     if (parseInt(this.state.contractWorkflowStatus) === 0) {
@@ -369,6 +397,55 @@ class App extends Component {
     );
   }
 
+  renderDeposite() {
+    let status = parseInt(this.state.contractWorkflowStatus);
+    return (
+      <Grid item sm={12}>
+       
+       
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <Form.Group>
+          <Form.Label>Dai amount</Form.Label>
+
+            <Form.Control type="number" id="daiAmount"
+              ref={(input) => { this.daiAmount = input }}
+            />
+            </Form.Group>
+
+          
+
+          <Form.Group controlId="exampleForm.ControlSelect1">
+              <Form.Label>Projets : </Form.Label>
+              <Form.Control as="select"
+                 ref={(input) => { this.idProjet = input }}>
+                <option>projet 1</option>
+                <option>projet 2</option>
+                <option>projet 3</option>
+                <option>projet 4</option>
+                <option>projet 5</option>
+              </Form.Control>
+            </Form.Group>
+
+            <Form.Group>
+            <Form.Label>Durée : </Form.Label>
+              <Form.Control as="select"
+                 ref={(input) => { this.time = input }}>
+                <option>3 mois</option>
+                <option>6 mois</option>
+                <option>1 an</option>
+                <option>2 an</option>
+                <option>Don</option>
+              </Form.Control>
+
+           
+             </Form.Group>
+
+                <Button onClick={this.deposite} variant="contained" color="primary" > Deposite </Button>
+          </div>
+      </Grid>
+    );
+  }
+
   /*
   renderVotingSession() {
     let status = parseInt(this.state.contractWorkflowStatus);
@@ -419,7 +496,7 @@ class App extends Component {
         <AppBar position="static" color="primary" elevation={2} >
           <Toolbar >
             <Typography variant="h6" color="inherit" noWrap >
-              Système de vote
+              ChainForest
             </Typography>
           </Toolbar>
         </AppBar>
@@ -434,11 +511,10 @@ class App extends Component {
                 {this.state.accounts}
               </div>
               <br />
-              {this.renderWorklfowStatus()}
-              {this.state.isOwner ?
-                this.renderWorkflowButtons()
-                : <span />
-              }
+             
+              <div>
+              {this.renderDeposite()}
+              </div>
             </Grid>
             {this.renderProposalsRegistration()}            
           </Grid>

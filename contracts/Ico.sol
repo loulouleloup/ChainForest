@@ -50,7 +50,9 @@ import './Projects.sol';
     address public defiContract = 0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa; //A mettre dans le constructor ==> deploy
 
     constructor(address tokenAddress, uint _duration, uint _price, uint _availableTokens, uint _minPurchase, uint _maxPurchase) public {
-       CFtoken = ERC20Token(tokenAddress);
+         admin = msg.sender;
+         workflowStatus = WorkflowStatus.notStartedYet;
+        CFtoken = ERC20Token(tokenAddress);
         require(_duration > 0,'_duration shloud be > 0');
         require(_availableTokens > 0 && _availableTokens <= CFtoken.maxTotalSupply(),'_availableTokens should be > 0 and <= maxTotalSupply');
         require(_minPurchase > 0,'_minPurchase shloud be > 0');
@@ -64,6 +66,9 @@ import './Projects.sol';
         availableTokens = _availableTokens;
         minPurchase = _minPurchase;
         maxPurchase = _maxPurchase;
+    }
+    function owner() external view returns(address) {
+        return admin;
     }
 
     modifier onlyAdmin(){
