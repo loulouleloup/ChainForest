@@ -132,7 +132,7 @@ library SafeMath {
      *
      * Requirements:
      *
-     * 
+     *
      * - The divisor cannot be zero.
      */
     function div(uint256 a, uint256 b) internal pure returns (uint256) {
@@ -349,12 +349,12 @@ interface IUniswapV2Router01 {
         returns (uint[] memory amounts);
 
     function quote(uint amountA, uint reserveA, uint reserveB) external pure returns (uint amountB);
-    
+
     function getAmountOut(uint amountIn, uint reserveIn, uint reserveOut) external pure returns (uint amountOut);
     function getAmountIn(uint amountOut, uint reserveIn, uint reserveOut) external pure returns (uint amountIn);
-    
+
     function getAmountsOut(uint amountIn, address[] calldata path) external view returns (uint[] memory amounts);
-    
+
     function getAmountsIn(uint amountOut, address[] calldata path) external view returns (uint[] memory amounts);
 }
 
@@ -381,6 +381,7 @@ interface IUniswapV2Router02 is IUniswapV2Router01 {
         uint amountIn,
         uint amountOutMin,
         address[] calldata path,
+
         address to,
         uint deadline
     ) external;
@@ -477,115 +478,125 @@ interface IERC20 {
 contract BlockchainForestDefi is Ownable {
     using SafeMath for uint;
     using SafeERC20 for IERC20;
-    
-    
+
+
     address daiTokenAddress = 0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa;
     //address usdtTokenAddress = 0x07de306FF27a2B630B1141956844eB1552B956B5;
-    address usdtTokenAddress = 0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984;
+    address usdtTokenAddress = 0xe22da380ee6B445bb8273C81944ADEB6E8450422;
     address lpAddress = 0xFA73472326E0e0128E2CA6CeB1964fd77F4AE78d;
-    
+
     //address uniswapRouterAddress = 0x05fF2B0DB69458A0750badebc4f9e13aDd608C7F;
     //address uniswapFactoryAddress = 0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f;
-    
+
     IUniswapV2Router02 uniswapRouter = IUniswapV2Router02(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
     IUniswapV2Factory uniswapFactory = IUniswapV2Factory(0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f);
+
+    mapping (address => uint) Investments;
+    mapping (address => uint) depositTimeList;
+
+    //Ajouter mapping pour enregistrer LPs avant et LPs après
+    //calculer différence LPs pour le projet
+    //ID du projet
 
     constructor() public {
 
     }
-    
-    
-   receive() external payable {
-       //appel fonction swapHalfDaiToUsdt
-       //appel addliquidityToDaiUsdt
-   }
-   
-   //--> Reçoit du DAI 
-   //--> 50%USDT et 50 % DAI
-   //--> Ajouter liqui 50/50 USDT / DAI sur uniswap 
-   //--> Remove liqui 50/50 USDT / DAI 
-   //--> USDT vers DAI
-   
 
-   
-    function swapHalfDaiToUsdc(uint _amount) public onlyOwner {
-      uint amountTemp = _amount.mul(1e18);
+
+
+
+
+
+    function followInvestments(address investor, uint _daiAmount,  uint depositTime) public onlyOwner{
+        Investments[investor] = _daiAmount;
+        depositTimeList[investor] = depositTime;
+
+    }
+
+
+    function sendToDefi(uint _amount) public {
+        swapHalfDaiToUsdc(_amount);
+
+        addliquidityToDaiUsdt(_amount);
+    }
+
+
+
+    function swapHalfDaiToUsdc(uint _amount) public  {
+        //uint amountDaiTemp = _amountDai.mul(1e18);
+        uint amountTemp = _amount;
       amountTemp = amountTemp.div(2);
-      
+
       IUniswapV2Router02 UniswapRouter = IUniswapV2Router02(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
       address[] memory path = new address[](2);
-      path[0] = daiTokenAddress; 
+      path[0] = daiTokenAddress;
       path[1] = usdtTokenAddress;
       IERC20 daiInstance = IERC20(daiTokenAddress);
       daiInstance.safeApprove(address(UniswapRouter), amountTemp);
       UniswapRouter.swapExactTokensForTokens(amountTemp, 1, path, address(this), now + 120 );
-      
+
    }
-        
- 
-        
+
+
+
     function addliquidityToDaiUsdt(uint _amountDai) public returns (bool) {
-      
+
         IUniswapV2Router02 UniswapRouter = IUniswapV2Router02(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
-        
-        uint amountDaiTemp = _amountDai.mul(1e18);
+
+        //uint amountDaiTemp = _amountDai.mul(1e18);
+        uint amountDaiTemp = _amountDai;
         address[] memory path = new address[](2);
-        path[0] = daiTokenAddress; 
+        path[0] = daiTokenAddress;
         path[1] = usdtTokenAddress;
-        
+
         //UniswapRouter.getAmountsOut(amountTemp, path)[1];
         uint amountUsdtOut = UniswapRouter.getAmountsOut(amountDaiTemp, path)[1];
-        
+
         IERC20 daiInstance = IERC20(daiTokenAddress);
-        IERC20 usdtInstance = IERC20(usdtTokenAddress); 
-        
+        IERC20 usdtInstance = IERC20(usdtTokenAddress);
+
         daiInstance.safeApprove(address(UniswapRouter), amountDaiTemp);
         usdtInstance.safeApprove(address(UniswapRouter), amountUsdtOut);
-        
+
         UniswapRouter.addLiquidity(usdtTokenAddress, daiTokenAddress, amountUsdtOut, amountDaiTemp, 1000, 1000, address(this), now + 120);
-        
+
         return true;
-        
+
     }
 
-    
 
-    //fonction remove 
+
+    //fonction remove
     function removeLiquidityfromDaiUsdt(uint _lpAmount) public returns (bool) {
 
         IUniswapV2Router02 UniswapRouter = IUniswapV2Router02(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
-        
+
         IERC20 lpInstance = IERC20(lpAddress);
-        
+
         uint amountLpTemp = _lpAmount.mul(1e18);
 
         lpInstance.safeApprove(address(UniswapRouter), amountLpTemp);
-        
+
         UniswapRouter.removeLiquidity(usdtTokenAddress, daiTokenAddress, amountLpTemp, 1000, 1000, address(this), now + 120);
-        
+
         return true;
-        
+
     }
-    
-    
-    function swapHalfUsdcToDai(uint _amount) public onlyOwner {
+
+
+    function swapHalfUsdcToDai(uint _amount) public {
       uint amountTemp = _amount.mul(1e18);
       //amountTemp = amountTemp.div(2);
-      
+
       IUniswapV2Router02 UniswapRouter = IUniswapV2Router02(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
       address[] memory path = new address[](2);
-      path[0] = usdtTokenAddress; 
+      path[0] = usdtTokenAddress;
       path[1] = daiTokenAddress;
       IERC20 usdtInstance = IERC20(usdtTokenAddress);
       usdtInstance.safeApprove(address(UniswapRouter), amountTemp);
       UniswapRouter.swapExactTokensForTokens(amountTemp, 1, path, address(this), now + 120 );
-      
+
    }
-    //fonction envoi Dai au contrat de Louis (argument nb dai investis par l'utilisateur)
-    
-    //fonction qui appelle les 3 fonctions pour que Louis appelle seulement celle-ci
+
 
 }
-
-
-
